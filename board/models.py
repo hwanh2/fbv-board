@@ -10,7 +10,7 @@ class Board(models.Model):
     readcount = models.IntegerField(default=0)
     
     def __str__(self):
-        return '%s. %s(%d)'%(self.title,self.writer,self.content)
+        return '%s. %s(%d)'%(self.title,self.writer,self.readcount)
     def incrementReadCount(self):
         self.readcount+=1
         self.save()
