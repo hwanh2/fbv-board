@@ -5,7 +5,6 @@ from .models import Board
 from .serializers import BoardSerializer
 from drf_yasg.utils import swagger_auto_schema
 
-
 @api_view(['GET'])
 def index(request):
     return Response({'message': 'Index page'}, status=status.HTTP_200_OK)
@@ -25,20 +24,22 @@ def read(request, id):
     try:
         board = Board.objects.get(pk=id)
         board.incrementReadCount()
-        # 기존에 사용한 BoardDetailSerializer 대신 BoardSerializer를 사용
         serializer = BoardSerializer(board)
         return Response(serializer.data, status=status.HTTP_200_OK)
     except Board.DoesNotExist:
         return Response({'error': 'Board not found'}, status=status.HTTP_404_NOT_FOUND)
 
+@swagger_auto_schema(methods=['post'], responses={201: BoardSerializer, 404: 'Board not found'})
 @api_view(['POST'])
 def regist(request):
+    # 생성하기 때문에 클라이언트가 보낸 값을 저장한 후 새로 데이터를 만들어서 응답
     title = request.data.get('title')
     writer = request.data.get('writer')
     content = request.data.get('content')
     if title and writer and content:
         board = Board.objects.create(title=title, writer=writer, content=content)
-        return Response({'id': board.id, 'message': 'Board created successfully'}, status=status.HTTP_201_CREATED)
+        serializer = BoardSerializer(board)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
