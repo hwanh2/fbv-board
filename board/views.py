@@ -10,13 +10,11 @@ class IndexView(APIView):
         return Response({'message': 'Index page'}, status=status.HTTP_200_OK)
 
 class BoardListView(APIView):
+    @swagger_auto_schema(responses={200: BoardSerializer, 404: 'Board not found'})
     def get(self, request):
         boards = Board.objects.all().order_by('-id')
-        board_list = [
-            {'id': board.id, 'title': board.title, 'writer': board.writer, 'readcount': board.readcount}
-            for board in boards
-        ]
-        return Response(board_list, status=status.HTTP_200_OK)
+        serializer = BoardSerializer(boards, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class BoardReadView(APIView):
     @swagger_auto_schema(responses={200: BoardSerializer, 404: 'Board not found'})
@@ -30,7 +28,7 @@ class BoardReadView(APIView):
             return Response({'error': 'Board not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class BoardRegistView(APIView):
-    @swagger_auto_schema(responses={201: BoardSerializer, 404: 'Board not found'})
+    @swagger_auto_schema(request_body=BoardSerializer, responses={201: BoardSerializer, 404: 'Board not found'})
     def post(self, request):
         title = request.data.get('title')
         writer = request.data.get('writer')
@@ -42,6 +40,7 @@ class BoardRegistView(APIView):
         return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
 
 class BoardEditView(APIView):
+    @swagger_auto_schema(request_body=BoardSerializer, responses={200: BoardSerializer, 404: 'Board not found'})
     def put(self, request, id):
         try:
             board = Board.objects.get(pk=id)
