@@ -1,0 +1,15 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app  # fbv-board 전체를 /app으로 마운트
+    environment:
+      DJANGO_SETTINGS_MODULE: mysite.settings
+    working_dir: /app  # 컨테이너 내부에서 /app이 루트가 되도록 설정
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    restart: always
